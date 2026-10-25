@@ -1,3 +1,51 @@
+# PerpusKu — Modern Dashboard
+
+Aplikasi manajemen perpustakaan Flutter dengan Supabase dan Provider, dengan UI
+responsif untuk desktop, tablet, dan mobile.
+
+## Clone dan jalankan
+
+```bash
+git clone https://github.com/gefiranch/perpusku-modern-dashboard.git
+cd perpusku-modern-dashboard
+flutter pub get
+```
+
+Salin `.env.example` menjadi `.env`, lalu isi konfigurasi Supabase proyekmu.
+Di Windows, gunakan `copy .env.example .env`. Setelah itu:
+
+```bash
+flutter run -d windows
+```
+
+Untuk menggabungkan perubahan ke repo kelompok, ikuti
+[panduan merge](docs/MERGING.md). Repository ini merupakan fork sehingga riwayat
+commit project asal tetap tersambung.
+
+## Hasil redesign
+
+- Beranda dengan ringkasan dari data asli serta reservasi terkini.
+- Sidebar desktop, rail tablet, dan menu mobile untuk seluruh modul.
+- Katalog, anggota, reservasi, serta kategori/rak dengan tabel dan kartu adaptif.
+- Form terstruktur, status, konfirmasi hapus, serta feedback loading/error.
+- 145 tes lolos; analisis Flutter bersih pada Flutter 3.47.8 / Dart 3.13.7.
+
+![Tampilan desktop offline](docs/screenshots/desktop_overview.png)
+
+Screenshot memakai data kosong dari repository tes. Integrasi Supabase asli dan
+build Windows/Android belum diverifikasi. Siapkan `.env` milik proyek sesuai
+panduan di bawah sebelum menjalankan aplikasi.
+
+Lihat [audit desain](docs/REDESIGN_AUDIT.md), [hasil QA](docs/REDESIGN_QA.md),
+dan [panduan menjalankan](docs/REDESIGN_HANDOVER.md).
+
+Source awal: https://github.com/REMITMID/projekakhirpamp pada commit
+`0e27e1178d5a13b4841a978789cb0801259d4cc8`.
+
+---
+
+## Dokumentasi proyek asal
+
 # 📚 PerpusKu - Sistem Manajemen Perpustakaan Multiplatform
 
 **PerpusKu** adalah aplikasi manajemen perpustakaan berbasis **Flutter Multiplatform** (Android & Windows Desktop) yang terintegrasi dengan **Supabase** sebagai backend (Database & Autentikasi). 
