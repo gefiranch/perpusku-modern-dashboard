@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+
 import '../../data/book_repository.dart';
 import '../../domain/models/book_model.dart';
 
 class BookProvider extends ChangeNotifier {
-  final BookRepository _repository = BookRepository();
+  BookProvider({BookRepository? repository})
+    : _repository = repository ?? BookRepository();
+
+  final BookRepository _repository;
 
   List<BookModel> _books = [];
   bool _isLoading = false;
+  bool _isSaving = false;
+  bool get isSaving => _isSaving;
+  Future<void>? _fetching;
   String? _errorMessage;
   bool _isGridView = false;
 
@@ -33,7 +40,10 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchBooks() async {
+  Future<void> fetchBooks() =>
+      _fetching ??= _fetch().whenComplete(() => _fetching = null);
+
+  Future<void> _fetch() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -48,42 +58,30 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addBook(BookModel book) async {
+  Future<bool> _mutate(Future<void> Function() operation) async {
+    if (_isSaving) return false;
+    _isSaving = true;
     _errorMessage = null;
+    notifyListeners();
     try {
-      await _repository.addBook(book);
+      final pending = _fetching;
+      if (pending != null) await pending;
+      await operation();
       await fetchBooks();
       return true;
     } catch (e) {
       _errorMessage = e.toString();
-      notifyListeners();
       return false;
+    } finally {
+      _isSaving = false;
+      notifyListeners();
     }
   }
 
-  Future<bool> updateBook(BookModel book) async {
-    _errorMessage = null;
-    try {
-      await _repository.updateBook(book);
-      await fetchBooks();
-      return true;
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> deleteBook(String id) async {
-    _errorMessage = null;
-    try {
-      await _repository.deleteBook(id);
-      await fetchBooks();
-      return true;
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
+  Future<bool> addBook(BookModel book) =>
+      _mutate(() => _repository.addBook(book));
+  Future<bool> updateBook(BookModel book) =>
+      _mutate(() => _repository.updateBook(book));
+  Future<bool> deleteBook(String id) =>
+      _mutate(() => _repository.deleteBook(id));
 }
