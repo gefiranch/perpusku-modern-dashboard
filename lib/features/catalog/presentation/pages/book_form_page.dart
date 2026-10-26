@@ -1,5 +1,7 @@
+import 'package:projekakhirpamp/core/widgets/app_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../domain/models/book_model.dart';
 import '../providers/book_provider.dart';
 
@@ -72,8 +74,9 @@ class _BookFormPageState extends State<BookFormPage> {
     _codeController = TextEditingController(text: widget.book?.bookCode ?? '');
     _titleController = TextEditingController(text: widget.book?.title ?? '');
     _authorController = TextEditingController(text: widget.book?.author ?? '');
-    _publisherController =
-        TextEditingController(text: widget.book?.publisher ?? '');
+    _publisherController = TextEditingController(
+      text: widget.book?.publisher ?? '',
+    );
     _yearController = TextEditingController(
       text: widget.book != null ? widget.book!.publicationYear.toString() : '',
     );
@@ -127,6 +130,7 @@ class _BookFormPageState extends State<BookFormPage> {
   }
 
   Future<void> _saveForm() async {
+    if (_isSubmitting) return;
     // Aktifkan mode autovalidasi setelah tombol simpan ditekan
     setState(() {
       _autoValidateMode = AutovalidateMode.onUserInteraction;
@@ -146,8 +150,9 @@ class _BookFormPageState extends State<BookFormPage> {
           ),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
       return;
@@ -211,8 +216,9 @@ class _BookFormPageState extends State<BookFormPage> {
           ),
           backgroundColor: Colors.green.shade700,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
       Navigator.pop(context, true);
@@ -232,8 +238,9 @@ class _BookFormPageState extends State<BookFormPage> {
           ),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }
@@ -245,7 +252,7 @@ class _BookFormPageState extends State<BookFormPage> {
     final isEdit = widget.book != null;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text(
           isEdit ? 'Edit Data Buku' : 'Tambah Buku Baru',
@@ -255,481 +262,512 @@ class _BookFormPageState extends State<BookFormPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
       ),
-      body: Form(
-        key: _formKey,
-        autovalidateMode: _autoValidateMode,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            // Banner Info Mode
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isEdit
-                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
-                    : Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isEdit
-                      ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                      : Colors.indigo.shade100,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    isEdit
-                        ? Icons.edit_note_rounded
-                        : Icons.auto_stories_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isEdit
-                              ? 'Mengubah Informasi Buku'
-                              : 'Katalog Koleksi Baru',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          isEdit
-                              ? 'Perbarui data yang diperlukan lalu simpan perubahan.'
-                              : 'Lengkapi semua data buku untuk disimpan ke database.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
+      body: ContentWidth(
+        child: AbsorbPointer(
+          absorbing: _isSubmitting,
+          child: Form(
+            key: _formKey,
+            autovalidateMode: _autoValidateMode,
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                // Banner Info Mode
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isEdit
+                        ? theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.5,
+                          )
+                        : Colors.indigo.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isEdit
+                          ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                          : Colors.indigo.shade100,
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Card 1: Informasi Pokok Buku
-            _buildSectionCard(
-              title: 'Informasi Pokok Buku',
-              icon: Icons.menu_book_rounded,
-              theme: theme,
-              children: [
-                // Kode Buku
-                TextFormField(
-                  controller: _codeController,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Kode Buku *',
-                    hintText: 'Misal: BK-001, NVL-05',
-                    helperText: 'Minimal 3 karakter, huruf kapital dan angka',
-                    icon: Icons.qr_code_2_rounded,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Kode buku wajib diisi';
-                    }
-                    final trimmed = val.trim();
-                    if (trimmed.length < 3) {
-                      return 'Kode buku minimal 3 karakter';
-                    }
-                    if (trimmed.length > 20) {
-                      return 'Kode buku maksimal 20 karakter';
-                    }
-                    final regex = RegExp(r'^[a-zA-Z0-9\-_]+$');
-                    if (!regex.hasMatch(trimmed)) {
-                      return 'Hanya boleh huruf, angka, strip (-), atau (_)';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Judul Buku
-                TextFormField(
-                  controller: _titleController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Judul Buku *',
-                    hintText: 'Masukkan judul buku lengkap',
-                    icon: Icons.title_rounded,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Judul buku wajib diisi';
-                    }
-                    final trimmed = val.trim();
-                    if (trimmed.length < 2) {
-                      return 'Judul buku minimal 2 karakter';
-                    }
-                    if (trimmed.length > 255) {
-                      return 'Judul buku maksimal 255 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Nama Penulis
-                TextFormField(
-                  controller: _authorController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Nama Penulis *',
-                    hintText: 'Contoh: Pramoedya Ananta Toer',
-                    icon: Icons.person_outline_rounded,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Nama penulis wajib diisi';
-                    }
-                    final trimmed = val.trim();
-                    if (trimmed.length < 2) {
-                      return 'Nama penulis minimal 2 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Penerbit
-                TextFormField(
-                  controller: _publisherController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Penerbit *',
-                    hintText: 'Contoh: Gramedia Pustaka Utama',
-                    icon: Icons.apartment_rounded,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Nama penerbit wajib diisi';
-                    }
-                    final trimmed = val.trim();
-                    if (trimmed.length < 2) {
-                      return 'Nama penerbit minimal 2 karakter';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Card 2: Klasifikasi & Lokasi (Dropdown)
-            _buildSectionCard(
-              title: 'Klasifikasi & Penempatan',
-              icon: Icons.shelves,
-              theme: theme,
-              children: [
-                // Dropdown Kategori
-                DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Kategori Buku *',
-                    hintText: 'Pilih Kategori',
-                    icon: Icons.category_rounded,
-                  ),
-                  items: _categoriesList.map((cat) {
-                    final isManual = cat == 'Lainnya (Ketik Manual)';
-                    return DropdownMenuItem<String>(
-                      value: cat,
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          color: isManual ? Colors.indigo : Colors.black87,
-                          fontStyle:
-                              isManual ? FontStyle.italic : FontStyle.normal,
-                          fontWeight:
-                              isManual ? FontWeight.bold : FontWeight.normal,
+                  child: Row(
+                    children: [
+                      Icon(
+                        isEdit
+                            ? Icons.edit_note_rounded
+                            : Icons.auto_stories_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isEdit
+                                  ? 'Mengubah Informasi Buku'
+                                  : 'Katalog Koleksi Baru',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isEdit
+                                  ? 'Perbarui data yang diperlukan lalu simpan perubahan.'
+                                  : 'Lengkapi semua data buku untuk disimpan ke database.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedCategory = val;
-                      _isCustomCategory = (val == 'Lainnya (Ketik Manual)');
-                    });
-                  },
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Kategori wajib dipilih';
-                    }
-                    return null;
-                  },
-                ),
-
-                // Jika memilih 'Lainnya (Ketik Manual)'
-                if (_isCustomCategory) ...[
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _customCategoryController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: _buildInputDecoration(
-                      labelText: 'Ketik Kategori Baru *',
-                      hintText: 'Contoh: Ensiklopedia Sains',
-                      icon: Icons.edit_note_rounded,
-                    ),
-                    validator: (val) {
-                      if (_isCustomCategory) {
-                        if (val == null || val.trim().isEmpty) {
-                          return 'Kategori baru wajib diisi';
-                        }
-                        if (val.trim().length < 2) {
-                          return 'Kategori minimal 2 karakter';
-                        }
-                      }
-                      return null;
-                    },
+                    ],
                   ),
-                ],
+                ),
                 const SizedBox(height: 16),
 
-                // Dropdown Lokasi Rak
-                DropdownButtonFormField<String>(
-                  value: _selectedRack,
-                  decoration: _buildInputDecoration(
-                    labelText: 'Lokasi Rak *',
-                    hintText: 'Pilih Lokasi Rak',
-                    icon: Icons.location_on_outlined,
-                  ),
-                  items: _racksList.map((rack) {
-                    final isManual = rack == 'Lainnya (Ketik Manual)';
-                    return DropdownMenuItem<String>(
-                      value: rack,
-                      child: Text(
-                        rack,
-                        style: TextStyle(
-                          color: isManual ? Colors.indigo : Colors.black87,
-                          fontStyle:
-                              isManual ? FontStyle.italic : FontStyle.normal,
-                          fontWeight:
-                              isManual ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedRack = val;
-                      _isCustomRack = (val == 'Lainnya (Ketik Manual)');
-                    });
-                  },
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Lokasi rak wajib dipilih';
-                    }
-                    return null;
-                  },
-                ),
-
-                // Jika memilih 'Lainnya (Ketik Manual)'
-                if (_isCustomRack) ...[
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _customRackController,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: _buildInputDecoration(
-                      labelText: 'Ketik Lokasi Rak Baru *',
-                      hintText: 'Contoh: Rak E-01, Lantai 3',
-                      icon: Icons.add_location_alt_outlined,
-                    ),
-                    validator: (val) {
-                      if (_isCustomRack) {
-                        if (val == null || val.trim().isEmpty) {
-                          return 'Lokasi rak baru wajib diisi';
-                        }
-                        if (val.trim().length < 2) {
-                          return 'Lokasi rak minimal 2 karakter';
-                        }
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-                const SizedBox(height: 16),
-
-                // Tahun Terbit & Stok dalam 2 Kolom
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // Card 1: Informasi Pokok Buku
+                _buildSectionCard(
+                  title: 'Informasi Pokok Buku',
+                  icon: Icons.menu_book_rounded,
+                  theme: theme,
                   children: [
-                    // Tahun Terbit
-                    Expanded(
-                      child: TextFormField(
-                        controller: _yearController,
-                        keyboardType: TextInputType.number,
+                    // Kode Buku
+                    TextFormField(
+                      controller: _codeController,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Kode Buku *',
+                        hintText: 'Misal: BK-001, NVL-05',
+                        helperText:
+                            'Minimal 3 karakter, huruf kapital dan angka',
+                        icon: Icons.qr_code_2_rounded,
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Kode buku wajib diisi';
+                        }
+                        final trimmed = val.trim();
+                        if (trimmed.length < 3) {
+                          return 'Kode buku minimal 3 karakter';
+                        }
+                        if (trimmed.length > 20) {
+                          return 'Kode buku maksimal 20 karakter';
+                        }
+                        final regex = RegExp(r'^[a-zA-Z0-9\-_]+$');
+                        if (!regex.hasMatch(trimmed)) {
+                          return 'Hanya boleh huruf, angka, strip (-), atau (_)';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Judul Buku
+                    TextFormField(
+                      controller: _titleController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Judul Buku *',
+                        hintText: 'Masukkan judul buku lengkap',
+                        icon: Icons.title_rounded,
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Judul buku wajib diisi';
+                        }
+                        final trimmed = val.trim();
+                        if (trimmed.length < 2) {
+                          return 'Judul buku minimal 2 karakter';
+                        }
+                        if (trimmed.length > 255) {
+                          return 'Judul buku maksimal 255 karakter';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Nama Penulis
+                    TextFormField(
+                      controller: _authorController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Nama Penulis *',
+                        hintText: 'Contoh: Pramoedya Ananta Toer',
+                        icon: Icons.person_outline_rounded,
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Nama penulis wajib diisi';
+                        }
+                        final trimmed = val.trim();
+                        if (trimmed.length < 2) {
+                          return 'Nama penulis minimal 2 karakter';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Penerbit
+                    TextFormField(
+                      controller: _publisherController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Penerbit *',
+                        hintText: 'Contoh: Gramedia Pustaka Utama',
+                        icon: Icons.apartment_rounded,
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Nama penerbit wajib diisi';
+                        }
+                        final trimmed = val.trim();
+                        if (trimmed.length < 2) {
+                          return 'Nama penerbit minimal 2 karakter';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Card 2: Klasifikasi & Lokasi (Dropdown)
+                _buildSectionCard(
+                  title: 'Klasifikasi & Penempatan',
+                  icon: Icons.shelves,
+                  theme: theme,
+                  children: [
+                    // Dropdown Kategori
+                    DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      initialValue: _selectedCategory,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Kategori Buku *',
+                        hintText: 'Pilih Kategori',
+                        icon: Icons.category_rounded,
+                      ),
+                      items: _categoriesList.map((cat) {
+                        final isManual = cat == 'Lainnya (Ketik Manual)';
+                        return DropdownMenuItem<String>(
+                          value: cat,
+                          child: Text(
+                            cat,
+                            style: TextStyle(
+                              color: isManual ? Colors.indigo : Colors.black87,
+                              fontStyle: isManual
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
+                              fontWeight: isManual
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedCategory = val;
+                          _isCustomCategory = (val == 'Lainnya (Ketik Manual)');
+                        });
+                      },
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Kategori wajib dipilih';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // Jika memilih 'Lainnya (Ketik Manual)'
+                    if (_isCustomCategory) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _customCategoryController,
+                        textCapitalization: TextCapitalization.words,
                         decoration: _buildInputDecoration(
-                          labelText: 'Tahun Terbit *',
-                          hintText: 'Contoh: 2024',
-                          icon: Icons.calendar_month_rounded,
+                          labelText: 'Ketik Kategori Baru *',
+                          hintText: 'Contoh: Ensiklopedia Sains',
+                          icon: Icons.edit_note_rounded,
                         ),
                         validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return 'Tahun wajib diisi';
-                          }
-                          final trimmed = val.trim();
-                          final year = int.tryParse(trimmed);
-                          if (year == null) {
-                            return 'Harus angka';
-                          }
-                          final maxYear = DateTime.now().year + 1;
-                          if (year < 1000 || year > maxYear) {
-                            return 'Antara 1000-$maxYear';
+                          if (_isCustomCategory) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Kategori baru wajib diisi';
+                            }
+                            if (val.trim().length < 2) {
+                              return 'Kategori minimal 2 karakter';
+                            }
                           }
                           return null;
                         },
                       ),
-                    ),
-                    const SizedBox(width: 12),
+                    ],
+                    const SizedBox(height: 16),
 
-                    // Jumlah Stok
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextFormField(
-                            controller: _stockController,
+                    // Dropdown Lokasi Rak
+                    DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      initialValue: _selectedRack,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Lokasi Rak *',
+                        hintText: 'Pilih Lokasi Rak',
+                        icon: Icons.location_on_outlined,
+                      ),
+                      items: _racksList.map((rack) {
+                        final isManual = rack == 'Lainnya (Ketik Manual)';
+                        return DropdownMenuItem<String>(
+                          value: rack,
+                          child: Text(
+                            rack,
+                            style: TextStyle(
+                              color: isManual ? Colors.indigo : Colors.black87,
+                              fontStyle: isManual
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
+                              fontWeight: isManual
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedRack = val;
+                          _isCustomRack = (val == 'Lainnya (Ketik Manual)');
+                        });
+                      },
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Lokasi rak wajib dipilih';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // Jika memilih 'Lainnya (Ketik Manual)'
+                    if (_isCustomRack) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _customRackController,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: _buildInputDecoration(
+                          labelText: 'Ketik Lokasi Rak Baru *',
+                          hintText: 'Contoh: Rak E-01, Lantai 3',
+                          icon: Icons.add_location_alt_outlined,
+                        ),
+                        validator: (val) {
+                          if (_isCustomRack) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Lokasi rak baru wajib diisi';
+                            }
+                            if (val.trim().length < 2) {
+                              return 'Lokasi rak minimal 2 karakter';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildSectionCard(
+                  title: 'Stok & Penerbitan',
+                  icon: Icons.inventory_2_outlined,
+                  theme: theme,
+                  children: [
+                    ResponsiveFields(
+                      children: [
+                        // Tahun Terbit
+                        Expanded(
+                          child: TextFormField(
+                            controller: _yearController,
                             keyboardType: TextInputType.number,
                             decoration: _buildInputDecoration(
-                              labelText: 'Stok Buku *',
-                              hintText: 'Contoh: 5',
-                              icon: Icons.inventory_2_rounded,
+                              labelText: 'Tahun Terbit *',
+                              hintText: 'Contoh: 2024',
+                              icon: Icons.calendar_month_rounded,
                             ),
                             validator: (val) {
                               if (val == null || val.trim().isEmpty) {
-                                return 'Stok wajib diisi';
+                                return 'Tahun wajib diisi';
                               }
                               final trimmed = val.trim();
-                              final stock = int.tryParse(trimmed);
-                              if (stock == null) {
+                              final year = int.tryParse(trimmed);
+                              if (year == null) {
                                 return 'Harus angka';
                               }
-                              if (stock < 0) {
-                                return 'Tidak boleh < 0';
-                              }
-                              if (stock > 99999) {
-                                return 'Maks 99999';
+                              final maxYear = DateTime.now().year + 1;
+                              if (year < 1000 || year > maxYear) {
+                                return 'Antara 1000-$maxYear';
                               }
                               return null;
                             },
                           ),
-                          const SizedBox(height: 4),
-                          // Tombol Cepat - / + Stok
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Jumlah Stok
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.all(4),
-                                tooltip: 'Kurangi 1',
-                                icon: const Icon(
-                                  Icons.remove_circle_outline,
-                                  size: 20,
-                                  color: Colors.redAccent,
+                              TextFormField(
+                                controller: _stockController,
+                                keyboardType: TextInputType.number,
+                                decoration: _buildInputDecoration(
+                                  labelText: 'Stok Buku *',
+                                  hintText: 'Contoh: 5',
+                                  icon: Icons.inventory_2_rounded,
                                 ),
-                                onPressed: () => _adjustStock(-1),
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) {
+                                    return 'Stok wajib diisi';
+                                  }
+                                  final trimmed = val.trim();
+                                  final stock = int.tryParse(trimmed);
+                                  if (stock == null) {
+                                    return 'Harus angka';
+                                  }
+                                  if (stock < 0) {
+                                    return 'Tidak boleh < 0';
+                                  }
+                                  if (stock > 99999) {
+                                    return 'Maks 99999';
+                                  }
+                                  return null;
+                                },
                               ),
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.all(4),
-                                tooltip: 'Tambah 1',
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  size: 20,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () => _adjustStock(1),
-                              ),
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.all(4),
-                                tooltip: 'Tambah 5',
-                                icon: const Icon(
-                                  Icons.exposure_plus_1,
-                                  size: 20,
-                                  color: Colors.indigo,
-                                ),
-                                onPressed: () => _adjustStock(5),
+                              const SizedBox(height: 4),
+                              // Tombol Cepat - / + Stok
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 44,
+                                      minHeight: 44,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    tooltip: 'Kurangi 1',
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      size: 20,
+                                      color: Colors.redAccent,
+                                    ),
+                                    onPressed: () => _adjustStock(-1),
+                                  ),
+                                  IconButton(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 44,
+                                      minHeight: 44,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    tooltip: 'Tambah 1',
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      size: 20,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: () => _adjustStock(1),
+                                  ),
+                                  IconButton(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 44,
+                                      minHeight: 44,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    tooltip: 'Tambah 5',
+                                    icon: const Icon(
+                                      Icons.exposure_plus_1,
+                                      size: 20,
+                                      color: Colors.indigo,
+                                    ),
+                                    onPressed: () => _adjustStock(5),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Tombol Simpan & Batal
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Batal'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: _isSubmitting ? null : _saveForm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        icon: _isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                isEdit ? Icons.save_rounded : Icons.add_rounded,
+                              ),
+                        label: Text(
+                          _isSubmitting
+                              ? 'Menyimpan...'
+                              : isEdit
+                              ? 'Simpan Perubahan'
+                              : 'Tambah Buku',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 32),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Tombol Simpan & Batal
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('Batal'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSubmitting ? null : _saveForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    icon: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Icon(isEdit ? Icons.save_rounded : Icons.add_rounded),
-                    label: Text(
-                      _isSubmitting
-                          ? 'Menyimpan...'
-                          : isEdit
-                              ? 'Simpan Perubahan'
-                              : 'Tambah Buku',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-          ],
+          ),
         ),
       ),
     );
@@ -742,7 +780,7 @@ class _BookFormPageState extends State<BookFormPage> {
     required List<Widget> children,
   }) {
     return Card(
-      elevation: 1,
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       color: Colors.white,
       child: Padding(
@@ -754,11 +792,13 @@ class _BookFormPageState extends State<BookFormPage> {
               children: [
                 Icon(icon, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -781,6 +821,8 @@ class _BookFormPageState extends State<BookFormPage> {
       labelText: labelText,
       hintText: hintText,
       helperText: helperText,
+      helperMaxLines: 3,
+      errorMaxLines: 3,
       prefixIcon: Icon(icon, size: 22),
       filled: true,
       fillColor: Colors.grey.shade50,

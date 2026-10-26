@@ -1,5 +1,8 @@
+import 'package:projekakhirpamp/core/widgets/app_layout.dart';
+import 'package:projekakhirpamp/core/widgets/record_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../domain/models/book_model.dart';
 import '../providers/book_provider.dart';
 import 'book_detail_page.dart';
@@ -33,17 +36,11 @@ class _BookListPageState extends State<BookListPage> {
     super.dispose();
   }
 
-  Color _getStockColor(int stock) {
-    if (stock > 3) return Colors.green;
-    if (stock > 0) return Colors.orange;
-    return Colors.red;
-  }
-
   void _confirmDelete(BuildContext context, BookModel book) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Row(
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red),
@@ -66,8 +63,10 @@ class _BookListPageState extends State<BookListPage> {
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              final provider =
-                  Provider.of<BookProvider>(context, listen: false);
+              final provider = Provider.of<BookProvider>(
+                context,
+                listen: false,
+              );
               final success = await provider.deleteBook(book.id!);
               if (!context.mounted) return;
 
@@ -114,7 +113,8 @@ class _BookListPageState extends State<BookListPage> {
     // Filter buku berdasarkan pencarian & kategori
     final filteredBooks = bookProvider.books.where((book) {
       final query = _searchQuery.toLowerCase().trim();
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           book.title.toLowerCase().contains(query) ||
           book.author.toLowerCase().contains(query) ||
           book.bookCode.toLowerCase().contains(query) ||
@@ -122,7 +122,8 @@ class _BookListPageState extends State<BookListPage> {
           book.rackLocation.toLowerCase().contains(query) ||
           book.publisher.toLowerCase().contains(query);
 
-      final matchesCategory = _selectedCategory == 'Semua' ||
+      final matchesCategory =
+          _selectedCategory == 'Semua' ||
           book.category.trim().toLowerCase() ==
               _selectedCategory.trim().toLowerCase();
 
@@ -135,11 +136,12 @@ class _BookListPageState extends State<BookListPage> {
       0,
       (sum, item) => sum + item.stock,
     );
-    final outOfStockCount =
-        bookProvider.books.where((b) => b.stock <= 0).length;
+    final outOfStockCount = bookProvider.books
+        .where((b) => b.stock <= 0)
+        .length;
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+    return WorkspacePage(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -147,7 +149,7 @@ class _BookListPageState extends State<BookListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'PerpusKu',
+              'Katalog Buku',
               style: TextStyle(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -162,7 +164,9 @@ class _BookListPageState extends State<BookListPage> {
         ),
         actions: [
           IconButton(
-            tooltip: bookProvider.isGridView ? 'Tampilan List' : 'Tampilan Grid',
+            tooltip: bookProvider.isGridView
+                ? 'Tampilan List'
+                : 'Tampilan Grid',
             icon: Icon(
               bookProvider.isGridView
                   ? Icons.view_list_rounded
@@ -197,14 +201,20 @@ class _BookListPageState extends State<BookListPage> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Cari judul, penulis, kode, atau rak...',
-                    hintStyle:
-                        TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                    prefixIcon:
-                        const Icon(Icons.search_rounded, color: Colors.grey),
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search_rounded,
+                      color: Colors.grey,
+                    ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear_rounded,
-                                color: Colors.grey),
+                            icon: const Icon(
+                              Icons.clear_rounded,
+                              color: Colors.grey,
+                            ),
                             onPressed: () {
                               _searchController.clear();
                               setState(() {
@@ -214,7 +224,7 @@ class _BookListPageState extends State<BookListPage> {
                           )
                         : null,
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: const Color(0xFFF5F7FA),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -227,7 +237,7 @@ class _BookListPageState extends State<BookListPage> {
                 // Kategori Chips
                 if (categoriesList.length > 1)
                   SizedBox(
-                    height: 36,
+                    height: 52,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: categoriesList.length,
@@ -238,10 +248,12 @@ class _BookListPageState extends State<BookListPage> {
                         final count = cat == 'Semua'
                             ? bookProvider.books.length
                             : bookProvider.books
-                                .where((b) =>
-                                    b.category.trim().toLowerCase() ==
-                                    cat.trim().toLowerCase())
-                                .length;
+                                  .where(
+                                    (b) =>
+                                        b.category.trim().toLowerCase() ==
+                                        cat.trim().toLowerCase(),
+                                  )
+                                  .length;
 
                         return ChoiceChip(
                           label: Text('$cat ($count)'),
@@ -256,9 +268,9 @@ class _BookListPageState extends State<BookListPage> {
                           ),
                           selected: isSelected,
                           selectedColor: theme.colorScheme.primary,
-                          backgroundColor: Colors.grey.shade100,
+                          backgroundColor: const Color(0xFFF5F7FA),
                           showCheckmark: false,
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: VisualDensity.standard,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                             side: BorderSide(
@@ -287,7 +299,10 @@ class _BookListPageState extends State<BookListPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               color: Colors.grey.shade50,
-              child: Row(
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     'Menampilkan ${filteredBooks.length} dari $totalTitles judul buku',
@@ -297,10 +312,11 @@ class _BookListPageState extends State<BookListPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Spacer(),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.indigo.shade50,
                       borderRadius: BorderRadius.circular(6),
@@ -318,7 +334,9 @@ class _BookListPageState extends State<BookListPage> {
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red.shade50,
                         borderRadius: BorderRadius.circular(6),
@@ -351,15 +369,15 @@ class _BookListPageState extends State<BookListPage> {
                     ),
                   )
                 : bookProvider.errorMessage != null
-                    ? _buildErrorView(bookProvider)
-                    : filteredBooks.isEmpty
-                        ? _buildEmptyView(bookProvider.books.isEmpty)
-                        : RefreshIndicator(
-                            onRefresh: () => bookProvider.fetchBooks(),
-                            child: bookProvider.isGridView
-                                ? _buildGridView(filteredBooks, theme)
-                                : _buildListView(filteredBooks, theme),
-                          ),
+                ? _buildErrorView(bookProvider)
+                : filteredBooks.isEmpty
+                ? _buildEmptyView(bookProvider.books.isEmpty)
+                : RefreshIndicator(
+                    onRefresh: () => bookProvider.fetchBooks(),
+                    child: bookProvider.isGridView
+                        ? _buildGridView(filteredBooks, theme)
+                        : _buildListView(filteredBooks, theme),
+                  ),
           ),
         ],
       ),
@@ -376,498 +394,85 @@ class _BookListPageState extends State<BookListPage> {
     );
   }
 
-  Widget _buildErrorView(BookProvider provider) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.cloud_off_rounded, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            const Text(
-              'Gagal Memuat Katalog',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              provider.errorMessage ?? 'Terjadi kesalahan sistem.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () => provider.fetchBooks(),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildErrorView(BookProvider provider) => FeedbackState(
+    title: 'Gagal Memuat Katalog',
+    message: 'Periksa koneksi lalu coba lagi.',
+    action: provider.fetchBooks,
+  );
+  Widget _buildEmptyView(bool isEmpty) => FeedbackState(
+    title: isEmpty ? 'Belum Ada Buku di Katalog' : 'Buku Tidak Ditemukan',
+    message: isEmpty
+        ? 'Tambahkan buku pertama ke koleksi perpustakaan.'
+        : 'Coba kata kunci atau kategori lainnya.',
+    actionLabel: isEmpty ? 'Tambah Buku Sekarang' : 'Reset Pencarian & Filter',
+    action: () {
+      if (isEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const BookFormPage()),
+        );
+      } else {
+        _searchController.clear();
+        setState(() {
+          _searchQuery = '';
+          _selectedCategory = 'Semua';
+        });
+      }
+    },
+  );
 
-  Widget _buildEmptyView(bool isCompletelyEmpty) {
-    if (isCompletelyEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  size: 64,
-                  color: Colors.indigo.shade400,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Belum Ada Buku di Katalog',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Katalog perpustakaan masih kosong. Mulai tambahkan buku pertama sekarang.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
+  Widget _buildListView(List<BookModel> books, ThemeData theme) =>
+      _collection(books, false);
+  Widget _buildGridView(List<BookModel> books, ThemeData theme) =>
+      _collection(books, true);
+  Widget _collection(List<BookModel> books, bool grid) => RecordCollection(
+    grid: grid,
+    headers: const ['Buku', 'Penulis', 'Kategori', 'Rak', 'Stok'],
+    items: books
+        .map(
+          (book) => RecordItem(
+            title: book.title,
+            subtitle:
+                '${book.author} · ${book.bookCode}\n${book.category} · ${book.rackLocation}\nStok: ${book.stock}',
+            cells: [
+              book.title,
+              book.author,
+              book.category,
+              book.rackLocation,
+              '${book.stock}',
+            ],
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BookDetailPage(book: book)),
+            ),
+            actions: [
+              IconButton(
+                tooltip: 'Detail Buku',
+                icon: const Icon(Icons.open_in_new),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const BookFormPage()),
+                  MaterialPageRoute(builder: (_) => BookDetailPage(book: book)),
                 ),
-                icon: const Icon(Icons.add),
-                label: const Text('Tambah Buku Sekarang'),
+              ),
+              IconButton(
+                tooltip: 'Edit Buku',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BookFormPage(book: book)),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Hapus Buku',
+                icon: const Icon(Icons.delete_outline),
+                onPressed:
+                    context.watch<BookProvider>().isSaving || book.id == null
+                    ? null
+                    : () => _confirmDelete(context, book),
               ),
             ],
           ),
-        ),
-      );
-    }
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off_rounded,
-                size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            const Text(
-              'Buku Tidak Ditemukan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tidak ada buku yang sesuai dengan kata kunci atau filter saat ini.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _searchQuery = '';
-                  _selectedCategory = 'Semua';
-                });
-              },
-              icon: const Icon(Icons.filter_alt_off_rounded),
-              label: const Text('Reset Pencarian & Filter'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildListView(List<BookModel> books, ThemeData theme) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
-      itemCount: books.length,
-      itemBuilder: (context, index) {
-        final book = books[index];
-        final stockColor = _getStockColor(book.stock);
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          elevation: 1.5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          color: Colors.white,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => BookDetailPage(book: book)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon Cover Buku dengan Badge Kode
-                  Container(
-                    width: 50,
-                    height: 65,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.book_rounded,
-                          color: theme.colorScheme.primary,
-                          size: 26,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          book.bookCode,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-
-                  // Informasi Buku
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          book.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.person_outline_rounded,
-                                size: 14, color: Colors.grey.shade600),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                book.author,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-
-                        // Badges Kategori, Lokasi Rak & Stok
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: [
-                            // Kategori
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary
-                                    .withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                book.category,
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            // Lokasi Rak
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                                border:
-                                    Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.shelves,
-                                      size: 11, color: Colors.black54),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    book.rackLocation,
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Stok
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: stockColor.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                book.stock > 0
-                                    ? 'Stok: ${book.stock}'
-                                    : 'Habis',
-                                style: TextStyle(
-                                  color: stockColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Aksi Tombol Cepat (Edit & Hapus)
-                  Column(
-                    children: [
-                      IconButton(
-                        tooltip: 'Edit Buku',
-                        constraints: const BoxConstraints(),
-                        padding: const EdgeInsets.all(6),
-                        icon: const Icon(Icons.edit_outlined,
-                            size: 20, color: Colors.blueAccent),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BookFormPage(book: book),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      IconButton(
-                        tooltip: 'Hapus Buku',
-                        constraints: const BoxConstraints(),
-                        padding: const EdgeInsets.all(6),
-                        icon: const Icon(Icons.delete_outline,
-                            size: 20, color: Colors.redAccent),
-                        onPressed: () => _confirmDelete(context, book),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildGridView(List<BookModel> books, ThemeData theme) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: books.length,
-      itemBuilder: (context, index) {
-        final book = books[index];
-        final stockColor = _getStockColor(book.stock);
-
-        return Card(
-          elevation: 1.5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          color: Colors.white,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => BookDetailPage(book: book)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Kartu: Kode Buku & Kategori Chip
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          book.bookCode,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: stockColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          book.stock > 0 ? '${book.stock}' : '0',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: stockColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Banner Icon Buku
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.menu_book_rounded,
-                        color: theme.colorScheme.primary,
-                        size: 28,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Judul Buku
-                  Text(
-                    book.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-
-                  // Penulis
-                  Text(
-                    book.author,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 11,
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // Lokasi Rak
-                  Row(
-                    children: [
-                      const Icon(Icons.shelves,
-                          size: 12, color: Colors.black54),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          book.rackLocation,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Aksi Tombol Edit & Hapus
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: Colors.grey.shade200),
-                      ),
-                    ),
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          tooltip: 'Edit',
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(4),
-                          icon: const Icon(Icons.edit_outlined,
-                              size: 18, color: Colors.blueAccent),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => BookFormPage(book: book),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          tooltip: 'Hapus',
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(4),
-                          icon: const Icon(Icons.delete_outline,
-                              size: 18, color: Colors.redAccent),
-                          onPressed: () => _confirmDelete(context, book),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+        )
+        .toList(),
+  );
 }
