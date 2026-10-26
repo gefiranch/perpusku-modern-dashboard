@@ -1,5 +1,7 @@
+import 'package:projekakhirpamp/core/widgets/app_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -56,13 +58,18 @@ class _SignUpPageState extends State<SignUpPage> {
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: Colors.redAccent,
-          ),
+          SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -80,9 +87,9 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       ),
       body: SafeArea(
-        child: Center(
+        child: AuthLayout(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -91,11 +98,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.person_add_alt_1_rounded,
-                    size: 56,
+                    size: 32,
                     color: theme.colorScheme.primary,
                   ),
                 ),
@@ -120,6 +127,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Form Input Email
                 TextField(
                   controller: _emailController,
+                  enabled: !isLoading,
+                  textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
@@ -134,6 +143,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Form Input Password
                 TextField(
                   controller: _passwordController,
+                  enabled: !isLoading,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -160,6 +170,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Form Input Konfirmasi Password
                 TextField(
                   controller: _confirmPasswordController,
+                  enabled: !isLoading,
                   obscureText: !_isConfirmPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Konfirmasi Password',
@@ -172,7 +183,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       onPressed: () {
                         setState(() {
-                          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
                         });
                       },
                     ),
@@ -195,38 +207,39 @@ class _SignUpPageState extends State<SignUpPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 2,
+                      elevation: 0,
                     ),
                     child: isLoading
                         ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : const Text(
-                      'Daftar Sekarang',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                            'Daftar Sekarang',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 20),
 
                 // Navigate Back to Login
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       'Sudah memiliki akun? ',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
                       child: Text(
                         'Masuk di sini',
                         style: TextStyle(
