@@ -1,8 +1,11 @@
+import 'core/theme/app_theme.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:projekakhirpamp/features/dashboard/presentation/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/reservation/presentation/providers/reservation_provider.dart';
 import 'features/auth/presentation/pages/login_page.dart';
@@ -17,7 +20,7 @@ void main() async {
 
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   runApp(
@@ -27,7 +30,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ReservationProvider()),
         ChangeNotifierProvider(create: (_) => MemberProvider()),
         ChangeNotifierProvider(create: (_) => CategoryRackProvider()),
-        ChangeNotifierProvider(create: (_) => BookProvider())
+        ChangeNotifierProvider(create: (_) => BookProvider()),
       ],
       child: const MyApp(),
     ),
@@ -44,10 +47,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PerpusKu - Reservasi Buku',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       home: authProvider.currentUser == null
           ? const LoginPage()
           : const MainNavigationPage(),
