@@ -1,3 +1,5 @@
+import 'package:projekakhirpamp/core/widgets/app_layout.dart';
+import 'package:projekakhirpamp/core/widgets/record_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -79,7 +81,7 @@ class _MemberListPageState extends State<MemberListPage> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MemberProvider>();
-    return Scaffold(
+    return WorkspacePage(
       appBar: AppBar(
         title: const Text('Manajemen Anggota'),
         actions: [
@@ -151,32 +153,20 @@ class _MemberListPageState extends State<MemberListPage> {
     }
     return RefreshIndicator(
       onRefresh: provider.fetchMembers,
-      child: ListView.separated(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        itemCount: provider.members.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final member = provider.members[index];
-          return Card(
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-              title: Text(
-                member.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                [
-                  'No. Anggota: ${member.memberNumber}',
+      child: RecordCollection(
+        headers: const ['Nama / Nomor', 'Email', 'Telepon'],
+        items: provider.members
+            .map(
+              (member) => RecordItem(
+                title: member.name,
+                subtitle:
+                    'No. Anggota: ${member.memberNumber}\n${member.email}\n${member.phone}${member.address.isEmpty ? '' : '\n${member.address}'}',
+                cells: [
+                  '${member.name}\n${member.memberNumber}',
                   member.email,
                   member.phone,
-                  if (member.address.isNotEmpty) member.address,
-                ].join('\n'),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                ],
+                actions: [
                   IconButton(
                     tooltip: 'Edit anggota',
                     icon: const Icon(Icons.edit_outlined),
@@ -209,9 +199,8 @@ class _MemberListPageState extends State<MemberListPage> {
                     ),
                 ],
               ),
-            ),
-          );
-        },
+            )
+            .toList(),
       ),
     );
   }
